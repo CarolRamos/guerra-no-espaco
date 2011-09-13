@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Guerra no espaço</title>
+    <title>Guerra no espa&ccedil;o</title>
   </head>
   <body>
   
@@ -20,7 +20,6 @@
 	</tr>
     
 
-<script type="text/javascript" src="stats.js"></script>
 <script type="text/javascript">
 
 window.requestAnimFrame = (function(){
@@ -34,10 +33,19 @@ window.requestAnimFrame = (function(){
               };
 })();
 
-  var canvas = document.getElementById("surface");
-  var ctx = canvas.getContext("2d"); // webgl
+	var canvas = document.getElementById("surface");
+	var ctx = canvas.getContext("2d"); // webgl
+    
   
-
+	function desenhar() {				
+		for (x = 0; x <=canvas.width; x += 35)
+			for (y = 0; y <=canvas.height; y += 50)						
+				ctx.fillRect(x, y, 5, 20);	
+	}
+	
+	window.addEventListener("onload", desenhar());
+	
+	
 </script>
   </body>
 </html>
