@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Guerra no espaço</title>
+  </head>
+  <body>
+  
+	<h1>Guerra no espa&ccedil;o</h1>
+	
+	<table>
+
+	<tr>
+		<td>Pontos:</td>
+		<td>Fase:</td>
+		<td>Vidas:</td>
+	</tr>
+	<tr>		
+		<td colspan=3 ><canvas id="surface" width="640" height="480" style="background-color: #ccc;"></canvas></td>
+	</tr>
+    
+
+<script type="text/javascript" src="stats.js"></script>
+<script type="text/javascript">
+
+window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       ||
+              window.webkitRequestAnimationFrame ||
+              window.mozRequestAnimationFrame    ||
+              window.oRequestAnimationFrame      ||
+              window.msRequestAnimationFrame     ||
+              function(/* function */ callback, /* DOMElement */ element){
+                window.setTimeout(callback, 1000 / 60);
+              };
+})();
+
+  var canvas = document.getElementById("surface");
+  var ctx = canvas.getContext("2d"); // webgl
+  
+
+</script>
+  </body>
+</html>
