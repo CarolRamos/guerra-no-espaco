@@ -22,29 +22,65 @@
 
 <script type="text/javascript">
 
-window.requestAnimFrame = (function(){
-      return  window.requestAnimationFrame       ||
-              window.webkitRequestAnimationFrame ||
-              window.mozRequestAnimationFrame    ||
-              window.oRequestAnimationFrame      ||
-              window.msRequestAnimationFrame     ||
-              function(/* function */ callback, /* DOMElement */ element){
-                window.setTimeout(callback, 1000 / 60);
-              };
-})();
 
 	var canvas = document.getElementById("surface");
 	var ctx = canvas.getContext("2d"); // webgl
-    
-  
-	function desenhar() {				
+			
+	var angle = 0;
+	
+	var direcaoAngle = {};
+	direcaoAngle.right = 90;
+	direcaoAngle.down = 180;
+	direcaoAngle.left = 270;
+	direcaoAngle.up = 0;
+
+	
+	var planeImage = new Image();
+	planeImage.src = "red-airplane.png";
+	
+	var planeJogador = {}
+	planeJogador.sprite = planeImage;	
+	planeJogador.vx = 0.1;
+	planeJogador.vy = 0.2;
+	planeJogador.w = 64;
+	planeJogador.h = 64;
+	planeJogador.x = 100;
+	planeJogador.y = 100;
+	
+	function desenhar() {	
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		for (x = 0; x <=canvas.width; x += 35)
 			for (y = 0; y <=canvas.height; y += 50)						
 				ctx.fillRect(x, y, 5, 20);	
+		
+		ctx.save();
+		ctx.translate(planeJogador.x, planeJogador.y);				
+		ctx.rotate(angle * Math.PI/180);
+		ctx.drawImage(planeJogador.sprite, -planeJogador.w/2, -planeJogador.h/2);
+		ctx.restore();		
 	}
 	
-	window.addEventListener("onload", desenhar());
+	window.addEventListener("keydown", function(e) {		
+		if (e.keyCode == 37){ //seta esquerda
+			if (angle == direcaoAngle.up || angle == direcaoAngle.down)
+				angle = direcaoAngle.left;			
+		}
+		if (e.keyCode == 39){ //seta direita
+			if (angle == direcaoAngle.up || angle == direcaoAngle.down)
+				angle = direcaoAngle.right;				
+		}
+		if (e.keyCode == 38){ //seta cima
+			if (angle == direcaoAngle.left || angle == direcaoAngle.right)
+				angle = direcaoAngle.up;			
+		}
+		if (e.keyCode == 40){ //seta baixo
+			if (angle == direcaoAngle.left || angle == direcaoAngle.right)
+				angle = direcaoAngle.down;
+		}		
+	});
 	
+	window.addEventListener("onload", desenhar());
+	window.setInterval(desenhar, 300);
 	
 </script>
   </body>
