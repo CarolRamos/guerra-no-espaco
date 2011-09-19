@@ -53,15 +53,11 @@ var xRapidoAtira = 265;
 var yRapidoAtira = 10;
 var angleRapidoAtira = 0;
 
-//Velocidades 
-var movimentoDevagar = 2;
-var movimentoNormal = 4;
-var movimentoRapido = 6;
-
 var planeImage = new Image();
 planeImage.src = "red-airplane.png";
 
 planeImage.addEventListener("load", function() {
+	function desenha() {
 		ctx.save();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		for (x = 0; x <=canvas.width; x += 35) {
@@ -69,6 +65,7 @@ planeImage.addEventListener("load", function() {
 				ctx.fillRect(x, y, 5, 20);	
 			}
 		}
+		ctx.restore();
 	}
 	
 	var Nave = {
@@ -101,33 +98,46 @@ planeImage.addEventListener("load", function() {
 				ctx.restore();
 			}
 	}
-
+	
 	
 	window.addEventListener("keydown", function(e) {
 		if (e.keyCode == 38){ //seta cima
-			yJogador -= movimentoNormal;
-			angleJogador = 0;
-			Nave.jogador(xJogador,yJogador,angleJogador);
+			//Detecta se irá passar da area do canvas
+			if(yJogador-movimentoNormal >= 15) {
+				yJogador -= movimentoNormal;
+				angleJogador = 0;
+				Nave.jogador(xJogador,yJogador,angleJogador);
+			} 
+			
 		}
 		if (e.keyCode == 40){ //seta baixo
-			angleJogador = 180;
-			yJogador += movimentoNormal;
-			Nave.jogador(xJogador,yJogador,angleJogador);
+			//Detecta se irá passar da area do canvas
+			if(yJogador+movimentoNormal <= canvas.height-15) {
+				angleJogador = 180;
+				yJogador += movimentoNormal;
+				Nave.jogador(xJogador,yJogador,angleJogador);
+			}
 		}
 		
 		if(e.keyCode == 37) { //seta esquerda
-			angleJogador = 270;
-			xJogador -= movimentoNormal;
-			Nave.jogador(xJogador,yJogador,angleJogador);
+			//Detecta se irá passar da area do canvas
+			if(xJogador-movimentoNormal >= 15) {
+				angleJogador = 270;
+				xJogador -= movimentoNormal;
+				Nave.jogador(xJogador,yJogador,angleJogador);
+			}
+			
 		}
 		if(e.keyCode == 39) { //seta direita
-			angleJogador = 90;
-			xJogador  += movimentoNormal;
-			Nave.jogador(xJogador,yJogador,angleJogador);
+			if(xJogador+movimentoNormal <= canvas.width-15) {
+				angleJogador = 90;
+				xJogador  += movimentoNormal;
+				Nave.jogador(xJogador,yJogador,angleJogador);
+			}
+			
 		}
-		
-	});
 
+	});
 	
 	function loop() {
 	  desenha();
