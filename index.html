@@ -36,6 +36,7 @@ window.requestAnimFrame = (function(){
 var canvas = document.getElementById("surface");
 var ctx = canvas.getContext("2d");
 
+
 //Naves
 var xJogador = canvas.width/2-20;
 var yJogador = canvas.height/2;
@@ -45,13 +46,21 @@ var xDevagar = 55;
 var yDevagar = 10;
 var angleDevagar = 0;
 
+
 var xDevagarAtira = 160;
 var yDevagarAtira = 10;
 var angleDevagarAtira = 0;
 
+
 var xRapidoAtira = 265;
 var yRapidoAtira = 10;
 var angleRapidoAtira = 0;
+
+//Velocidades 
+var movimentoDevagar = 2;
+var movimentoNormal = 4;
+var movimentoRapido = 6;
+var movimentoTiro = 5;
 
 var planeImage = new Image();
 planeImage.src = "red-airplane.png";
@@ -99,7 +108,6 @@ planeImage.addEventListener("load", function() {
 			}
 	}
 	
-	
 	window.addEventListener("keydown", function(e) {
 		if (e.keyCode == 38){ //seta cima
 			//Detecta se irá passar da area do canvas
@@ -136,8 +144,8 @@ planeImage.addEventListener("load", function() {
 			}
 			
 		}
-
 	});
+	
 	
 	function loop() {
 	  desenha();
