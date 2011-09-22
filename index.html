@@ -38,7 +38,7 @@ var ctx = canvas.getContext("2d");
 
 
 //Naves
-var xJogador = canvas.width/2-20;
+var xJogador = canvas.width/2-23;
 var yJogador = canvas.height/2;
 var angleJogador = 0;
 
@@ -62,16 +62,34 @@ var movimentoNormal = 4;
 var movimentoRapido = 6;
 var movimentoTiro = 5;
 
+var mapaX = new Array();
+var mapaY = new Array();
+
+var i = 0;
+
+for (x = 0; x <=canvas.width; x += 39) {
+	mapaX[i] = x;
+	i++;
+}
+i = 0;
+for (y = 0; y <=canvas.height; y += 50) {					
+	mapaY[i] = y;
+	i++;
+}
+		
+
+
 var planeImage = new Image();
 planeImage.src = "red-airplane.png";
 
-planeImage.addEventListener("load", function() {
-	function desenha() {
+planeImage.addEventListener("load", desenha());
+	
+function desenha() {
 		ctx.save();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		for (x = 0; x <=canvas.width; x += 35) {
-			for (y = 0; y <=canvas.height; y += 50) {					
-				ctx.fillRect(x, y, 5, 20);	
+		for (x = 0; x < mapaX.length; x += 1) {
+			for (y = 0; y < mapaY.length; y += 1) {					
+				ctx.fillRect(mapaX[x], mapaY[y], 5, 20);	
 			}
 		}
 		ctx.restore();
@@ -108,39 +126,68 @@ planeImage.addEventListener("load", function() {
 			}
 	}
 	
+	
+	function colidiuX(){
+		var colidiu = false;
+			for ( i = 0; i < mapaX.length; i++ ){
+				if (xJogador >= (mapaX[i] -13) & xJogador <= (mapaX[i] + 18)){					
+					colidiu = true;
+				}
+			}
+		return colidiu;
+	}
+	
+	function colidiuY(){
+		var colidiu = false;
+			for ( i = 0; i < mapaY.length; i++ ){
+				if (yJogador >= (mapaY[i] -13) & yJogador <= (mapaY[i] + 33)){				
+					colidiu = true;
+				}
+			}
+		return colidiu;
+	}
+	
+	
 	window.addEventListener("keydown", function(e) {
 		if (e.keyCode == 38){ //seta cima
-			//Detecta se irá passar da area do canvas
-			if(yJogador-movimentoNormal >= 15) {
-				yJogador -= movimentoNormal;
-				angleJogador = 0;
-				Nave.jogador(xJogador,yJogador,angleJogador);
-			} 
-			
+			if (!colidiuX()){
+				//Detecta se irá passar da area do canvas
+				if(yJogador-movimentoNormal >= 15) {
+					yJogador -= movimentoNormal;
+					angleJogador = 0;
+					Nave.jogador(xJogador,yJogador,angleJogador);
+				} 
+			}			
 		}
-		if (e.keyCode == 40){ //seta baixo
-			//Detecta se irá passar da area do canvas
-			if(yJogador+movimentoNormal <= canvas.height-15) {
-				angleJogador = 180;
-				yJogador += movimentoNormal;
-				Nave.jogador(xJogador,yJogador,angleJogador);
+		if (e.keyCode == 40){ //seta baixo				
+			if (!colidiuX()){
+				//Detecta se irá passar da area do canvas
+				if(yJogador+movimentoNormal <= canvas.height-15) {
+					angleJogador = 180;
+					yJogador += movimentoNormal;
+					Nave.jogador(xJogador,yJogador,angleJogador);
+				}
 			}
 		}
 		
 		if(e.keyCode == 37) { //seta esquerda
-			//Detecta se irá passar da area do canvas
-			if(xJogador-movimentoNormal >= 15) {
-				angleJogador = 270;
-				xJogador -= movimentoNormal;
-				Nave.jogador(xJogador,yJogador,angleJogador);
+			if (!colidiuY()){
+				//Detecta se irá passar da area do canvas
+				if(xJogador-movimentoNormal >= 15) {
+					angleJogador = 270;
+					xJogador -= movimentoNormal;
+					Nave.jogador(xJogador,yJogador,angleJogador);
+				}
 			}
 			
 		}
 		if(e.keyCode == 39) { //seta direita
-			if(xJogador+movimentoNormal <= canvas.width-15) {
-				angleJogador = 90;
-				xJogador  += movimentoNormal;
-				Nave.jogador(xJogador,yJogador,angleJogador);
+			if (!colidiuY()){
+				if(xJogador+movimentoNormal <= canvas.width-15) {
+					angleJogador = 90;
+					xJogador  += movimentoNormal;
+					Nave.jogador(xJogador,yJogador,angleJogador);
+				}
 			}
 			
 		}
@@ -157,8 +204,8 @@ planeImage.addEventListener("load", function() {
 	} 
 	
 			
-	window.requestAnimFrame(loop(), canvas);
-});
+	window.requestAnimFrame(loop, canvas);
+
 	
 </script>
   </body>
