@@ -38,22 +38,24 @@ var ctx = canvas.getContext("2d");
 
 
 //Naves
+var navesInimigas = new Array("Devagar", "DevagarAtira", "RapidoAtira");
+
 var xJogador = canvas.width/2-23;
 var yJogador = canvas.height/2;
 var angleJogador = 0;
 
-var xDevagar = 55;
-var yDevagar = 10;
+var xDevagar = 297;
+var yDevagar = 380;
 var angleDevagar = 0;
 
 
-var xDevagarAtira = 160;
-var yDevagarAtira = 10;
+var xDevagarAtira = 140;
+var yDevagarAtira = 350;
 var angleDevagarAtira = 0;
 
 
-var xRapidoAtira = 265;
-var yRapidoAtira = 10;
+var xRapidoAtira = 255;
+var yRapidoAtira = 330;
 var angleRapidoAtira = 0;
 
 //Velocidades 
@@ -62,8 +64,12 @@ var movimentoNormal = 4;
 var movimentoRapido = 6;
 var movimentoTiro = 5;
 
+//ColisÃ£o
+var distanciaColisao = 28;
+
 var mapaX = new Array();
 var mapaY = new Array();
+
 
 var i = 0;
 
@@ -127,31 +133,44 @@ function desenha() {
 	}
 	
 	
-	function colidiuX(){
+	function colidiuX(nave){
 		var colidiu = false;
 			for ( i = 0; i < mapaX.length; i++ ){
-				if (xJogador >= (mapaX[i] -13) & xJogador <= (mapaX[i] + 18)){					
+				if( eval("x"+nave) >= (mapaX[i] -13) & eval("x"+nave) <= (mapaX[i] + 18)){					
 					colidiu = true;
 				}
 			}
 		return colidiu;
 	}
 	
-	function colidiuY(){
+	function colidiuY(nave){
 		var colidiu = false;
 			for ( i = 0; i < mapaY.length; i++ ){
-				if (yJogador >= (mapaY[i] -13) & yJogador <= (mapaY[i] + 33)){				
+				if ( eval("y"+nave) >= (mapaY[i] -13) & eval("y"+nave) <= (mapaY[i] + 33)){				
 					colidiu = true;
 				}
 			}
 		return colidiu;
+	}
+	
+	function colidiuInimigo(){
+		var colidiuInimigo = false;
+		
+		for(var i=0; i<navesInimigas.length; i++) {
+			if((xJogador+distanciaColisao >= eval("x"+navesInimigas[i]) && xJogador-distanciaColisao <= eval("x"+navesInimigas[i])) && (yJogador+distanciaColisao >= eval("y"+navesInimigas[i]) && yJogador-distanciaColisao <=eval("y"+navesInimigas[i]))) {
+				colidiuInimigo = true;
+			}
+		}
+		
+		if(colidiuInimigo) {
+			alert("Game-Over");
+		}		
 	}
 	
 	
 	window.addEventListener("keydown", function(e) {
 		if (e.keyCode == 38){ //seta cima
-			if (!colidiuX()){
-				//Detecta se irá passar da area do canvas
+			if (!colidiuX("Jogador")){
 				if(yJogador-movimentoNormal >= 15) {
 					yJogador -= movimentoNormal;
 					angleJogador = 0;
@@ -160,8 +179,8 @@ function desenha() {
 			}			
 		}
 		if (e.keyCode == 40){ //seta baixo				
-			if (!colidiuX()){
-				//Detecta se irá passar da area do canvas
+			if (!colidiuX("Jogador")){
+				//Detecta se irÃ¡ passar da area do canvas
 				if(yJogador+movimentoNormal <= canvas.height-15) {
 					angleJogador = 180;
 					yJogador += movimentoNormal;
@@ -171,8 +190,8 @@ function desenha() {
 		}
 		
 		if(e.keyCode == 37) { //seta esquerda
-			if (!colidiuY()){
-				//Detecta se irá passar da area do canvas
+			if (!colidiuY("Jogador")){
+				//Detecta se irÃ¡ passar da area do canvas
 				if(xJogador-movimentoNormal >= 15) {
 					angleJogador = 270;
 					xJogador -= movimentoNormal;
@@ -182,7 +201,7 @@ function desenha() {
 			
 		}
 		if(e.keyCode == 39) { //seta direita
-			if (!colidiuY()){
+			if (!colidiuY("Jogador")){
 				if(xJogador+movimentoNormal <= canvas.width-15) {
 					angleJogador = 90;
 					xJogador  += movimentoNormal;
@@ -193,9 +212,18 @@ function desenha() {
 		}
 	});
 	
+	function movimentoInimigo() {
+		if(colidiuInimigo) {
+			yDevagar -= movimentoDevagar;
+			yDevagarAtira -= movimentoDevagar;
+			yRapidoAtira -= movimentoRapido;
+		}
+	}
 	
 	function loop() {
 	  desenha();
+	  movimentoInimigo();
+	  colidiuInimigo();
 	  Nave.jogador(xJogador, yJogador, angleJogador);
 	  Nave.devagar(xDevagar, yDevagar, angleDevagar);
 	  Nave.devagarAtira(xDevagarAtira, yDevagarAtira, angleDevagar);
