@@ -13,7 +13,7 @@
 	<tr>
 		<td>Pontos:</td>
 		<td>Fase:</td>
-		<td>Vidas:</td>
+		<td id = "campoVidas">Vidas 3</td>
 	</tr>
 	<tr>		
 		<td colspan=3 ><canvas id="surface" width="640" height="480" style="background-color: #ccc;"></canvas></td>
@@ -36,10 +36,18 @@ window.requestAnimFrame = (function(){
 var canvas = document.getElementById("surface");
 var ctx = canvas.getContext("2d");
 
+function atualizarVidas(){
+	var campoVida = document.getElementById("campoVidas");
+	campoVida.innerHTML = 'Vidas: ' + qtdVidas;
+	
+}
+
 
 //Naves
 var navesInimigas = new Array("Devagar", "DevagarAtira", "RapidoAtira");
-
+var qtdVidas = 3;
+var fase = 1;
+var pontos = 0;
 var xJogador = canvas.width/2-23;
 var yJogador = canvas.height/2;
 var angleJogador = 0;
@@ -59,13 +67,15 @@ var yRapidoAtira = 330;
 var angleRapidoAtira = 0;
 
 //Velocidades 
-var movimentoDevagar = 2;
-var movimentoNormal = 4;
-var movimentoRapido = 6;
-var movimentoTiro = 5;
+var movimentoDevagar = 0.5;
+var movimentoNormal = 2;
+var movimentoRapido = 4;
+var movimentoTiro = 3;
 
-//ColisÃ£o
+//Colisao
 var distanciaColisao = 28;
+
+var cod = 38;
 
 var mapaX = new Array();
 var mapaY = new Array();
@@ -152,7 +162,8 @@ function desenha() {
 			}
 		return colidiu;
 	}
-	
+
+
 	function colidiuInimigo(){
 		var colidiuInimigo = false;
 		
@@ -163,54 +174,109 @@ function desenha() {
 		}
 		
 		if(colidiuInimigo) {
-			alert("Game-Over");
-		}		
+				qtdVidas = qtdVidas - 1;
+				if(qtdVidas <= 0){
+					gameOver();
+					reiniciarJogo();
+				}else{
+					atualizarStatus();
+					reiniciarJogo();
+				}
+		}
+	}
+
+	function atualizarStatus(){
+		atualizarVidas();
+	}
+
+	function gameOver(){
+		alert("Game-Over");
+		qtdVidas = 3;
+		fase = 1;
+		pontos = 0;
+		atualizarStatus();
+	}
+
+	function reiniciarJogador(){
+		xJogador = canvas.width/2-23;
+		yJogador = canvas.height/2;
+		angleJogador = 0; 
+	}
+
+	function reiniciarInimigos(){
+		//TODO percorrer array de inimigos pra posicionar cada um deles em um local aleatorio na tela distante do local inicial do jogador
+		 xDevagar = 297;
+		 yDevagar = 380;
+		 angleDevagar = 0;
+
+
+		 xDevagarAtira = 140;
+		 yDevagarAtira = 350;
+		 angleDevagarAtira = 0;
+
+
+		 xRapidoAtira = 255;
+		 yRapidoAtira = 330;
+		 angleRapidoAtira = 0;
+	}
+
+	function reiniciarJogo(){
+		reiniciarJogador();
+		reiniciarInimigos();
 	}
 	
-	
 	window.addEventListener("keydown", function(e) {
-		if (e.keyCode == 38){ //seta cima
+		pressionado = e.keyCode; 
+		modificaAngulo(pressionado);
+	});
+
+
+	function modificaAngulo(valor){
+		if (valor == 38){ //seta cima
 			if (!colidiuX("Jogador")){
 				if(yJogador-movimentoNormal >= 15) {
-					yJogador -= movimentoNormal;
+				pressionado = -1;
 					angleJogador = 0;
 					Nave.jogador(xJogador,yJogador,angleJogador);
 				} 
 			}			
 		}
-		if (e.keyCode == 40){ //seta baixo				
+		if (valor == 40){ //seta baixo				
 			if (!colidiuX("Jogador")){
-				//Detecta se irÃ¡ passar da area do canvas
+				//Detecta se ira passar da area do canvas
 				if(yJogador+movimentoNormal <= canvas.height-15) {
+					pressionado = -1;
 					angleJogador = 180;
-					yJogador += movimentoNormal;
 					Nave.jogador(xJogador,yJogador,angleJogador);
 				}
 			}
 		}
 		
-		if(e.keyCode == 37) { //seta esquerda
+		if(valor == 37) { //seta esquerda
 			if (!colidiuY("Jogador")){
-				//Detecta se irÃ¡ passar da area do canvas
+				//Detecta se ira passar da area do canvas
 				if(xJogador-movimentoNormal >= 15) {
+					pressionado = -1;
 					angleJogador = 270;
-					xJogador -= movimentoNormal;
 					Nave.jogador(xJogador,yJogador,angleJogador);
 				}
 			}
 			
 		}
-		if(e.keyCode == 39) { //seta direita
+		if(valor == 39) { //seta direita
 			if (!colidiuY("Jogador")){
 				if(xJogador+movimentoNormal <= canvas.width-15) {
+					pressionado = -1;
 					angleJogador = 90;
-					xJogador  += movimentoNormal;
 					Nave.jogador(xJogador,yJogador,angleJogador);
 				}
 			}
 			
 		}
-	});
+
+	}
+
+	var pressionado = -1;
 	
 	function movimentoInimigo() {
 		if(colidiuInimigo) {
@@ -219,10 +285,59 @@ function desenha() {
 			yRapidoAtira -= movimentoRapido;
 		}
 	}
-	
+
+
+	function movimentoJogador() {
+		if(angleJogador == 0){
+			yJogador -= movimentoNormal;
+		}
+		else if(angleJogador == 90){
+			xJogador += movimentoNormal;
+		}
+		else if(angleJogador == 180){
+			yJogador += movimentoNormal;
+		}
+		else if(angleJogador == 270){
+			xJogador -= movimentoNormal;
+		}
+		
+	}
+
+
+	function verificaLimiteTela(){
+		if(yJogador >= canvas.height){
+			yJogador = 2; 
+		}else if(yJogador <= 0){
+			yJogador = canvas.height; 
+		}else if(xJogador >= canvas.width){
+			xJogador = 0;
+		}else if(xJogador <= 0){
+			xJogador = canvas.width;
+		}
+	}	
 	function loop() {
+		
+		while(pressionado != -1){
+			if(angleJogador == 0){
+				yJogador -= movimentoNormal;
+			}
+			else if(angleJogador == 90){
+				xJogador += movimentoNormal;
+			}
+			else if(angleJogador == 180){
+				yJogador += movimentoNormal;
+			}
+			else if(angleJogador == 270){
+				xJogador -= movimentoNormal;
+			}
+			movimentoJogador();
+			modificaAngulo(pressionado);
+			Nave.jogador(xJogador, yJogador, angleJogador);
+		}
+	  verificaLimiteTela();
 	  desenha();
 	  movimentoInimigo();
+	  movimentoJogador();
 	  colidiuInimigo();
 	  Nave.jogador(xJogador, yJogador, angleJogador);
 	  Nave.devagar(xDevagar, yDevagar, angleDevagar);
