@@ -137,13 +137,14 @@ function NaveJogo() {
 		this.velocidade = movimentoNormal;
 }
 
-function Bala(x, y, angulo){
+function Bala(x, y, angulo, origemJogador){
 	this.x = x;
 	this.y = y;
 	this.angulo = angulo;
 	this.width = 3;
 	this.height = 12;
 	this.velocidade = movimentoTiro;
+	this.origemJogador = origemJogador;
 }
 
 
@@ -194,6 +195,9 @@ function redesenharNave(nave){
 }
 
 function desenhaBalas(){
+
+	verificaLimiteTelaBala();
+	verificaColisaoBalaNoInimigo();
 	for (i = 0; i < balas.length; i += 1) {
 		if (balas[i].angulo == 0){
 			balas[i].y -= balas[i].velocidade;
@@ -313,18 +317,67 @@ window.addEventListener("keydown", function(e) {
 	}
 	if (e.keyCode == 32){
 		if (jogador.angulo == 0)
-			balas[balas.length] = new Bala(jogador.x - 2, jogador.y - 20, jogador.angulo);
+			balas[balas.length] = new Bala(jogador.x - 2, jogador.y - 20, jogador.angulo, 1);
 		if (jogador.angulo == 90)
-			balas[balas.length] = new Bala(jogador.x + 20, jogador.y - 2, jogador.angulo);
+			balas[balas.length] = new Bala(jogador.x + 20, jogador.y - 2, jogador.angulo, 1);
 		if (jogador.angulo == 180)
-			balas[balas.length] = new Bala(jogador.x + 2, jogador.y + 20, jogador.angulo);
+			balas[balas.length] = new Bala(jogador.x + 2, jogador.y + 20, jogador.angulo, 1);
 		if (jogador.angulo == 270)
-			balas[balas.length] = new Bala(jogador.x - 20, jogador.y + 2, jogador.angulo);
+			balas[balas.length] = new Bala(jogador.x - 20, jogador.y + 2, jogador.angulo, 1);
 	}
 });
 
+/*
+function colidiuX(nave){
+	var colidiu = false;
+		for ( i = 0; i < mapaX.length; i++ ){
+			if( nave.x >= (mapaX[i] -13) & nave.x <= (mapaX[i] + 18)){					
+				colidiu = true;
+			}
+		}
+	return colidiu;
+}
+	
+function colidiuY(nave){
+	var colidiu = false;
+		for ( i = 0; i < mapaY.length; i++ ){
+			if ( nave.y >= (mapaY[i] -13) & nave.y <= (mapaY[i] + 33)){				
+				colidiu = true;
+			}
+		}
+	return colidiu;
+}*/
 
+function verificaColisaoBala(){
+	for(i = 0 ; i < balas.length; i++){
+		if(jogador.x == balas[i].x && jogador.y == balas[i].y){
+			//colidiu
+		}
+	}
+}
 
+function verificaColisaoBalaNoInimigo(){
+	var rangeX = 10;
+	var rangeY = 10;
+	var atingido = 0; 
+	for(i = 0 ; i < balas.length; i++){
+		for(j = 0; j < inimigos.length; j++){
+			if(balas[i].origemJogador == 1){
+				if(balas[i].x > inimigos[j].x - rangeX && balas[i].x < inimigos[j].x + rangeX){
+					if(balas[i].y > inimigos[j].y - rangeY && balas[i].y < inimigos[j].y + rangeY){
+						inimigos.splice(j, 1);
+						atingido = 1;	
+						
+					}
+				}
+			}
+		}
+		if(atingido == 1){
+			balas.splice(i, 1);
+		}
+		atingido = 0;
+	}
+}
 
 
 function modificaAngulo(valor, nave){
@@ -405,12 +458,31 @@ function modificaAngulo(valor, nave){
 		}else if(nave.x <= 0){
 			nave.x = canvas.width;
 		}
+	}
+
+	function verificaFase(){
+
+	}	
+
+	function verificaLimiteTelaBala(){
+		for(i = 0; i < balas.length; i++){
+			if(balas[i].y >= canvas.height){
+				balas.shift();
+			}else if(balas[i].y <= 0){
+				balas.shift();
+			}else if(balas[i].x >= canvas.width){
+				balas.shift();
+			}else if(balas[i].x <= 0){
+				balas.shift();
+			}
+		}
 	}	
 	
 	function loop() {	
 		
 	  verificaLimiteTela(jogador);
 	  desenha();
+	  desenhaBalas();
 	  for(i = 0; i < inimigos.length; i++){
 	  	verificaLimiteTela(inimigos[i]);
 	  	movimentoInimigo(inimigos[i]);
@@ -423,7 +495,8 @@ function modificaAngulo(valor, nave){
 			modificaAngulo(pressionado,jogador);
 	  }
 	  redesenharNave(jogador);
-	  desenhaBalas();
+	  verificaFase();
+	  
 	  
 	  window.requestAnimFrame(loop, canvas);
 	} 
