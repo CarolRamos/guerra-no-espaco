@@ -14,14 +14,21 @@
 		<td>Pontos:</td>
 		<td>Fase:</td>
 		<td id = "campoVidas">Vidas 3</td>
+		<td></td>
 	</tr>
 	<tr>		
 		<td colspan=3 ><canvas id="surface" width="640" height="480" style="background-color: #ccc;"></canvas></td>
+		<td> 
+		<b>Comandos:</b></br>
+		<b>P </b>- Iniciar o jogo</br>
+		<b>Barra de espa&ccedil;o </b>- Atirar
+		
+		</td>
 	</tr>
+	
     
 
 <script type="text/javascript">
-
 window.requestAnimFrame = (function(){
       return  window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
@@ -72,6 +79,10 @@ jogador.velocidade = movimentoNormal;
  
 var inimigos = new Array();
 inicializarInimigos();
+
+var balas = new Array();
+
+var pressionado = -1;
 
 function inicializarInimigos(){
 	var listaInimigos = new Array();
@@ -126,6 +137,15 @@ function NaveJogo() {
 		this.velocidade = movimentoNormal;
 }
 
+function Bala(x, y, angulo){
+	this.x = x;
+	this.y = y;
+	this.angulo = angulo;
+	this.width = 3;
+	this.height = 12;
+	this.velocidade = movimentoTiro;
+}
+
 
 var i = 0;
 
@@ -171,6 +191,28 @@ function redesenharNave(nave){
 		ctx.drawImage(planeImage, 26, 0, 26, 25, -13, -13, 25, 26);
 	}
 	ctx.restore();
+}
+
+function desenhaBalas(){
+	for (i = 0; i < balas.length; i += 1) {
+		if (balas[i].angulo == 0){
+			balas[i].y -= balas[i].velocidade;
+		}
+		if (balas[i].angulo == 90){
+			balas[i].x += balas[i].velocidade;
+		}
+		if (balas[i].angulo == 180){
+			balas[i].y += balas[i].velocidade;
+		}
+		if (balas[i].angulo == 270){
+			balas[i].x -= balas[i].velocidade;
+		}		
+		ctx.save();
+		ctx.translate(balas[i].x, balas[i].y);
+		ctx.rotate(balas[i].angulo * Math.PI/180);
+		ctx.fillRect(0, 0, balas[i].width, balas[i].height);
+		ctx.restore();
+	}
 }
 	
 function colidiuX(nave){
@@ -252,10 +294,7 @@ function reiniciarInimigos(){
 			inimigo.y = 330;
 			inimigo.angulo = 0
 		}
-		
-		
-		
-		
+				
 		listaInimigos[x] = inimigo;		
 	}
 	inimigos = listaInimigos;
@@ -267,9 +306,25 @@ function reiniciarJogo(){
 }
 	
 window.addEventListener("keydown", function(e) {
-	pressionado = e.keyCode; 
-	modificaAngulo(pressionado,jogador);
+	//Barra de espaço = 32
+	// P = 80
+	if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){	
+		pressionado = e.keyCode; 		
+	}
+	if (e.keyCode == 32){
+		if (jogador.angulo == 0)
+			balas[balas.length] = new Bala(jogador.x - 2, jogador.y - 20, jogador.angulo);
+		if (jogador.angulo == 90)
+			balas[balas.length] = new Bala(jogador.x + 20, jogador.y - 2, jogador.angulo);
+		if (jogador.angulo == 180)
+			balas[balas.length] = new Bala(jogador.x + 2, jogador.y + 20, jogador.angulo);
+		if (jogador.angulo == 270)
+			balas[balas.length] = new Bala(jogador.x - 20, jogador.y + 2, jogador.angulo);
+	}
 });
+
+
+
 
 
 function modificaAngulo(valor, nave){
@@ -316,8 +371,6 @@ function modificaAngulo(valor, nave){
 	}
 }
 	
-	var pressionado = -1;
-	
 	function movimentoInimigo(nave) {
 		if(colidiuInimigo) {
 			nave.y -= nave.velocidade;
@@ -354,45 +407,30 @@ function modificaAngulo(valor, nave){
 		}
 	}	
 	
-	function loop() {
+	function loop() {	
 		
-		while(pressionado != -1){
-			if(jogador.angulo == 0){
-				jogador.y -= jogador.velocidade;
-			}
-			else if(jogador.angulo == 90){
-				jogador.x += jogador.velocidade;
-			}
-			else if(jogador.angulo == 180){
-				jogador.y += jogador.velocidade;
-			}
-			else if(jogador.angulo == 270){
-				jogador.x-= jogador.velocidade;
-			}
-			movimentoJogador();
-			modificaAngulo(pressionado, jogador);
-			redesenharNave(jogador);
-		}
 	  verificaLimiteTela(jogador);
 	  desenha();
-	  
-	  redesenharNave(jogador);
 	  for(i = 0; i < inimigos.length; i++){
 	  	verificaLimiteTela(inimigos[i]);
 	  	movimentoInimigo(inimigos[i]);
 	  	colidiuInimigo();
 	  	redesenharNave(inimigos[i]);
 	  }
-	  
 	  movimentoJogador();
 	  colidiuInimigo();
-	  
+	  if (pressionado != -1){
+			modificaAngulo(pressionado,jogador);
+	  }
+	  redesenharNave(jogador);
+	  desenhaBalas();
 	  
 	  window.requestAnimFrame(loop, canvas);
 	} 
 	
 			
 	window.requestAnimFrame(loop, canvas);
+	
 
 	
 </script>
