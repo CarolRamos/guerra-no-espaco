@@ -11,7 +11,7 @@
 	<table>
 
 	<tr>
-		<td id="campoPontos">Pontos:</td>
+		<td id="campoPontos">Pontos: 0</td>
 		<td id = "campoMeta">Meta: 100</td>
 		<td id = "campoFase">Fase: 1</td>
 		<td id = "campoVidas">Vidas: 3</td>
@@ -62,42 +62,45 @@ function atualizarPontos(){
 }
 
 
-//Naves
-var qtdVidas = 3;
-var fase = 1;
-var pontos = 0;
-var metaPontuacao = 100;
-//Velocidades 
+/*********** STATUS DO JOGO ***********/
+var qtdVidas = 3; 			//Variavel que indica a quantidade de vidas do jogador
+var fase = 1; 				//Variavel que indica a fase atual do jogo
+var pontos = 0;				//Variavel que indica a quantidade pontos do jogador
+var metaPontuacao = 100;	//Variavel que indica a quantidade necessaria para o jogador passar de fase
+var vidaExtra = 500;		//Variavel que indica a quantidade pontos necessario para adquirir uma vida extra 
 
-var movimentoDevagar = 0.3;
-var movimentoNormal = 1;
-var movimentoRapido = 2;
-var movimentoTiro = 3;
+/*********** VELOCIDADES DAS NAVES E DOS TIROS ***********/ 
+var movimentoDevagar = 0.3; //Variavel para a velocidade da nave do tipo lenta
+var movimentoNormal = 1;	//Variavel para a velocidade da nave do tipo normal
+var movimentoRapido = 2;	//Variavel para a velocidade da nave do tipo rapida
+var movimentoTiro = 3;		//Variavel para a velocidade do tiro
 
-//Colisao
-var distanciaColisao = 28;
-
-var cod = 38;
-
-var mapaX = new Array();
-var mapaY = new Array();
+/*********** INFORMACOES SOBRE A COLISAO ***********/
+var distanciaColisao = 28; 	//Variavel que indica a distancia necessaria entre uma nave e outra para colidir
 
 
-var jogador = new NaveJogo();
-jogador.x = canvas.width/2-23;
-jogador.y = canvas.height/2;
-jogador.angulo = 0;
-jogador.tipo = 'jogador';
-jogador.velocidade = movimentoNormal;
-jogador.balas = new Array();
+/*********** MAPA DA POSICAO X e MAPA DA POSICAO Y ***********/
+var mapaX = new Array(); 	//Variavel referente as posicoes X do mapa
+var mapaY = new Array();	//Varaivel referente as posicoes Y do mapa
+
+
+/*********** INCIALIZACAO DO JOGO ***********/
+var jogador = new NaveJogo();			//Variavel referente ao jogado
+jogador.x = canvas.width/2-23;			//Posicao X inicial do jogador
+jogador.y = canvas.height/2;			//Posicao Y inicial do jogador
+jogador.angulo = 0;						//Angulo inicial do jogador
+jogador.tipo = 'jogador';				//Tipo da nave do jogador
+jogador.velocidade = movimentoNormal;	//Velocidade da nave do jogador
+jogador.balas = new Array();			//Lista de tiros do jogador
  
-var inimigos = new Array();
+var inimigos = new Array();				//Lista de inimigos na tela
+var balas = new Array();				//Lista de tiros na tela
+var pressionado = -1;					//Atributo para verificar se o jogador fez alguma movimentação enquanto estava entre uma parede
+var qtdMaxInimigos = 3; 				//Variavel que indica a quantidade maxima de inimigos na tela
 
-var balas = new Array();
-
-var pressionado = -1;
-
-var qtdMaxInimigos = 3; 
+/**
+Função utilizada para criar um novo inimigo na tela
+*/
 function gerarInimigo(){
 	if (inimigos.length < qtdMaxInimigos){
 		var inimigo = new NaveJogo();
@@ -153,6 +156,9 @@ function gerarInimigo(){
 	}
 }
 
+/**
+Estrutura de uma nave com as posições x,y,angulo, tipo da nave, a velocidade da nave e a sua lista de balas
+*/
 function NaveJogo() {
 		this.x = 257;
 		this.y = 380;
@@ -162,6 +168,9 @@ function NaveJogo() {
 		this.balas = new Array();
 }
 
+/**
+Estrutura da bala com as posições x,y,angulo, altura e largura, velocidade e se a origem da bala foi de um jogador ou de um inimigo
+*/
 function Bala(x, y, angulo, origemJogador){
 	this.x = x;
 	this.y = y;
@@ -173,9 +182,8 @@ function Bala(x, y, angulo, origemJogador){
 }
 
 
-var i = 0;
-
 //Inicializa o array do mapa do caminho
+var i = 0;
 for (x = 0; x <=canvas.width; x += 39) {
 	mapaX[i] = x;
 	i++;
@@ -360,7 +368,7 @@ function verificaColisaoBala(){
 		}
 	}
 }
-var vidaExtra = 500;
+
 function verificaColisaoBalaNoInimigo(){
 	var rangeX = 10;
 	var rangeY = 10;
