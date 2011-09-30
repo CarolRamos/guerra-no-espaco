@@ -360,7 +360,7 @@ function verificaColisaoBala(){
 		}
 	}
 }
-
+var vidaExtra = 500;
 function verificaColisaoBalaNoInimigo(){
 	var rangeX = 10;
 	var rangeY = 10;
@@ -378,6 +378,14 @@ function verificaColisaoBalaNoInimigo(){
 						}else if(inimigos[j].tipo == 'rapidoAtira'){
 							pontos += 30;
 						}
+						
+						if(pontos >= vidaExtra){
+							qtdVidas += 1;
+							vidaExtra += 500;
+							atualizarVidas();
+						}
+						
+						
 						atualizarPontos();
 						verificaFase();
 						
