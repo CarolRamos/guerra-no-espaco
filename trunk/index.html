@@ -11,9 +11,9 @@
 	<table>
 
 	<tr>
-		<td>Pontos:</td>
-		<td>Fase:</td>
-		<td id = "campoVidas">Vidas 3</td>
+		<td id="campoPontos">Pontos:</td>
+		<td id = "campoFase">Fase: 1</td>
+		<td id = "campoVidas">Vidas: 3</td>
 		<td></td>
 	</tr>
 	<tr>		
@@ -49,13 +49,26 @@ function atualizarVidas(){
 	
 }
 
+function atualizarFase(){
+	var campoFase = document.getElementById("campoFase");
+	campoFase.innerHTML = 'Fase: ' + fase;
+	
+}
+
+function atualizarPontos(){
+	var campoPontos = document.getElementById("campoPontos");
+	campoPontos.innerHTML = 'Pontos: ' + pontos;
+	
+}
+
 
 //Naves
 var qtdVidas = 3;
 var fase = 1;
 var pontos = 0;
-
+var metaPontuacao = 100;
 //Velocidades 
+
 var movimentoDevagar = 0.5;
 var movimentoNormal = 2;
 var movimentoRapido = 4;
@@ -92,7 +105,7 @@ function inicializarInimigos(){
 		var inimigo = new NaveJogo();
 		if(x == 1){
 			inimigo.x = 297;
-			inimigo.y = 380;
+			inimigo.y = 450;
 			inimigo.angulo = 0;
 		}else if(x == 2){
 			inimigo.x = 140;
@@ -135,6 +148,7 @@ function NaveJogo() {
 		this.angulo = 0;
 		this.tipo = 'devagar';
 		this.velocidade = movimentoNormal;
+		this.balas = new Array();
 }
 
 function Bala(x, y, angulo, origemJogador){
@@ -310,43 +324,36 @@ function reiniciarJogo(){
 }
 	
 window.addEventListener("keydown", function(e) {
-	//Barra de espaço = 32
+	//Barra de espaÃ§o = 32
 	// P = 80
 	if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){	
 		pressionado = e.keyCode; 		
 	}
 	if (e.keyCode == 32){
-		if (jogador.angulo == 0)
-			balas[balas.length] = new Bala(jogador.x - 2, jogador.y - 20, jogador.angulo, 1);
-		if (jogador.angulo == 90)
-			balas[balas.length] = new Bala(jogador.x + 20, jogador.y - 2, jogador.angulo, 1);
-		if (jogador.angulo == 180)
-			balas[balas.length] = new Bala(jogador.x + 2, jogador.y + 20, jogador.angulo, 1);
-		if (jogador.angulo == 270)
-			balas[balas.length] = new Bala(jogador.x - 20, jogador.y + 2, jogador.angulo, 1);
+		if(jogador.balas.length <= 3){
+			if (jogador.angulo == 0){
+				var novaBala = new Bala(jogador.x - 2, jogador.y - 20, jogador.angulo, 1); 
+				balas[balas.length] = novaBala;
+				jogador.balas.push(novaBala);
+			}
+			if (jogador.angulo == 90){
+				var novaBala = new Bala(jogador.x + 20, jogador.y - 2, jogador.angulo, 1); 
+				balas[balas.length] = novaBala;
+				jogador.balas.push(novaBala);
+			}
+			if (jogador.angulo == 180){
+				var novaBala = new Bala(jogador.x + 2, jogador.y + 20, jogador.angulo, 1);
+				balas[balas.length] = novaBala;
+				jogador.balas.push(novaBala);
+			}
+			if (jogador.angulo == 270){
+				var novaBala = new Bala(jogador.x - 20, jogador.y + 2, jogador.angulo, 1);
+				balas[balas.length] = novaBala;
+				jogador.balas.push(novaBala);
+			}
+		}
 	}
 });
-
-/*
-function colidiuX(nave){
-	var colidiu = false;
-		for ( i = 0; i < mapaX.length; i++ ){
-			if( nave.x >= (mapaX[i] -13) & nave.x <= (mapaX[i] + 18)){					
-				colidiu = true;
-			}
-		}
-	return colidiu;
-}
-	
-function colidiuY(nave){
-	var colidiu = false;
-		for ( i = 0; i < mapaY.length; i++ ){
-			if ( nave.y >= (mapaY[i] -13) & nave.y <= (mapaY[i] + 33)){				
-				colidiu = true;
-			}
-		}
-	return colidiu;
-}*/
 
 function verificaColisaoBala(){
 	for(i = 0 ; i < balas.length; i++){
@@ -365,8 +372,20 @@ function verificaColisaoBalaNoInimigo(){
 			if(balas[i].origemJogador == 1){
 				if(balas[i].x > inimigos[j].x - rangeX && balas[i].x < inimigos[j].x + rangeX){
 					if(balas[i].y > inimigos[j].y - rangeY && balas[i].y < inimigos[j].y + rangeY){
+
+						if(inimigos[j].tipo == 'devagar'){
+							pontos += 10;
+						}else if(inimigos[j].tipo == 'devagarAtira'){
+							pontos += 20;
+						}else if(inimigos[j].tipo == 'rapidoAtira'){
+							pontos += 30;
+						}
+						atualizarPontos();
+						verificaFase();
+						
 						inimigos.splice(j, 1);
 						atingido = 1;	
+
 						
 					}
 				}
@@ -374,6 +393,7 @@ function verificaColisaoBalaNoInimigo(){
 		}
 		if(atingido == 1){
 			balas.splice(i, 1);
+			jogador.balas.shift();
 		}
 		atingido = 0;
 	}
@@ -461,21 +481,38 @@ function modificaAngulo(valor, nave){
 	}
 
 	function verificaFase(){
-
+		if(pontos >= metaPontuacao){
+			metaPontuacao = metaPontuacao * 1.2;
+			fase = fase + 1;
+			atualizarFase();
+		}
 	}	
 
 	function verificaLimiteTelaBala(){
-		for(i = 0; i < balas.length; i++){
-			if(balas[i].y >= canvas.height){
-				balas.shift();
-			}else if(balas[i].y <= 0){
-				balas.shift();
-			}else if(balas[i].x >= canvas.width){
-				balas.shift();
-			}else if(balas[i].x <= 0){
-				balas.shift();
+			for(i = 0; i < balas.length; i++){
+					if(balas[i].y >= canvas.height){
+						if(balas[i].origemJogador){
+							jogador.balas.shift();							
+						}
+						balas.shift();
+					}else if(balas[i].y <= 0){
+						if(balas[i].origemJogador){
+							jogador.balas.shift();							
+						}
+						balas.shift();
+					}else if(balas[i].x >= canvas.width){
+						if(balas[i].origemJogador){
+							jogador.balas.shift();							
+						}
+						balas.shift();
+					}else if(balas[i].x <= 0){
+						if(balas[i].origemJogador){
+							jogador.balas.shift();							
+						}
+						balas.shift();
+					}
 			}
-		}
+			
 	}	
 	
 	function loop() {	
@@ -495,7 +532,7 @@ function modificaAngulo(valor, nave){
 			modificaAngulo(pressionado,jogador);
 	  }
 	  redesenharNave(jogador);
-	  verificaFase();
+	  
 	  
 	  
 	  window.requestAnimFrame(loop, canvas);
