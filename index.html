@@ -267,19 +267,21 @@ function colidiuY(nave){
 }
 
 
+	var inimigoColidido = false;
 function colidiuInimigo(){
-	var colidiuInimigo = false;
-	
+	inimigoColidido = false;	
 	for(var i=0; i<inimigos.length; i++) {
 		if((jogador.x + distanciaColisao >= inimigos[i].x && jogador.x-distanciaColisao <= inimigos[i].x) && (jogador.y+distanciaColisao >= inimigos[i].y && jogador.y-distanciaColisao <=inimigos[i].y)) {
-			colidiuInimigo = true;
+			inimigos.splice(i, 1);
+			inimigoColidido = true;
 		}
 	}
 		
-	if(colidiuInimigo) {
+	if(inimigoColidido) {
 		qtdVidas = qtdVidas - 1;
 		if(qtdVidas <= 0){
 			gameOver();
+			
 			reiniciarJogo();
 		}else{
 			atualizarStatus();
@@ -299,7 +301,9 @@ function gameOver(){
 	qtdVidas = 3;
 	fase = 1;
 	pontos = 0;
-	metaPontuacao = 0;
+	metaPontuacao = 100;
+	inimigos = new Array();
+	balas = new Array();
 	qtdMaxInimigos = 3;
 	atualizarStatus();
 	clearInterval(intervaloGeracaoInimigo);
@@ -513,6 +517,7 @@ function modificaAngulo(valor, nave){
 	  	verificaLimiteTela(inimigos[i]);
 	  	movimentoNave(inimigos[i]);
 	  	colidiuInimigo();
+	  	if(!inimigoColidido)
 	  	redesenharNave(inimigos[i]);
 	  }
 	  movimentoNave(jogador);
