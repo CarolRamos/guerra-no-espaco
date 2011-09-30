@@ -12,6 +12,7 @@
 
 	<tr>
 		<td id="campoPontos">Pontos:</td>
+		<td id = "campoMeta">Meta: 100</td>
 		<td id = "campoFase">Fase: 1</td>
 		<td id = "campoVidas">Vidas: 3</td>
 		<td></td>
@@ -56,6 +57,8 @@ function atualizarFase(){
 function atualizarPontos(){
 	var campoPontos = document.getElementById("campoPontos");
 	campoPontos.innerHTML = 'Pontos: ' + pontos;	
+	var campoMeta = document.getElementById("campoMeta");
+	campoMeta.innerHTML = 'Meta: ' + metaPontuacao;	
 }
 
 
@@ -86,6 +89,7 @@ jogador.y = canvas.height/2;
 jogador.angulo = 0;
 jogador.tipo = 'jogador';
 jogador.velocidade = movimentoNormal;
+jogador.balas = new Array();
  
 var inimigos = new Array();
 
@@ -93,9 +97,9 @@ var balas = new Array();
 
 var pressionado = -1;
 
-
+var qtdMaxInimigos = 3; 
 function gerarInimigo(){
-	if (inimigos.length < 3){
+	if (inimigos.length < qtdMaxInimigos){
 		var inimigo = new NaveJogo();
 		
 		var posX = parseInt((Math.random() * (mapaX.length-2))) + 1;
@@ -287,6 +291,7 @@ function colidiuInimigo(){
 
 function atualizarStatus(){
 	atualizarVidas();
+	atualizarPontos();
 }
 
 function gameOver(){
@@ -294,6 +299,8 @@ function gameOver(){
 	qtdVidas = 3;
 	fase = 1;
 	pontos = 0;
+	metaPontuacao = 0;
+	qtdMaxInimigos = 3;
 	atualizarStatus();
 	clearInterval(intervaloGeracaoInimigo);
 }
@@ -460,9 +467,12 @@ function modificaAngulo(valor, nave){
 	}
 
 	function verificaFase(){
+	console.log('pontos: ' + pontos);
+	console.log('meta: ' + metaPontuacao);
 		if(pontos >= metaPontuacao){
-			metaPontuacao = metaPontuacao * 1.2;
+			metaPontuacao += parseInt(metaPontuacao * 1.2);
 			fase = fase + 1;
+			qtdMaxInimigos = fase * 3;
 			atualizarFase();
 		}
 	}	
