@@ -1,35 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Guerra no espa&ccedil;o</title>
-  </head>
-  <body>
-  
+<head>
+<meta charset="utf-8">
+<title>Guerra no espa&ccedil;o</title>
+</head>
+<body>
+
 	<h1>Guerra no espa&ccedil;o</h1>
-	
+
 	<table>
 
-	<tr>
-		<td id="campoPontos">Pontos: 0</td>
-		<td id = "campoMeta">Meta: 100</td>
-		<td id = "campoFase">Fase: 1</td>
-		<td id = "campoVidas">Vidas: 3</td>
-		<td></td>
-	</tr>
-	<tr>		
-		<td colspan=3 ><canvas id="surface" width="640" height="480" style="background-color: #ccc;"></canvas></td>
-		<td> 
-		<b>Comandos:</b></br>
-		<b>P </b>- Iniciar o jogo</br>
-		<b>Barra de espa&ccedil;o </b>- Atirar
-		
-		</td>
-	</tr>
-	
-    
+		<tr>
+			<td id="campoPontos">Pontos: 0</td>
+			<td id="campoMeta">Meta: 100</td>
+			<td id="campoFase">Fase: 1</td>
+			<td id="campoVidas">Vidas: 3</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td colspan=3><canvas id="surface" width="640" height="480"
+					style="background-color: #ccc;"></canvas></td>
+			<td><b>Comandos:</b></br> <b>P </b>- Iniciar o jogo</br> <b>Barra de
+					espa&ccedil;o </b>- Atirar</td>
+		</tr>
 
-<script type="text/javascript">
+
+
+		<script type="text/javascript">
 window.requestAnimFrame = (function(){
       return  window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
@@ -70,10 +67,10 @@ var metaPontuacao = 100;	//Variavel que indica a quantidade necessaria para o jo
 var vidaExtra = 500;		//Variavel que indica a quantidade pontos necessario para adquirir uma vida extra 
 
 /*********** VELOCIDADES DAS NAVES E DOS TIROS ***********/ 
-var movimentoDevagar = 0.4; //Variavel para a velocidade da nave do tipo lenta
-var movimentoNormal = 1;	//Variavel para a velocidade da nave do tipo normal
-var movimentoRapido = 1.4;	//Variavel para a velocidade da nave do tipo rapida
-var movimentoTiro = 1.8;		//Variavel para a velocidade do tiro
+var movimentoDevagar = 0.7; //Variavel para a velocidade da nave do tipo lenta
+var movimentoNormal = 1.3;	//Variavel para a velocidade da nave do tipo normal
+var movimentoRapido = 1.8;	//Variavel para a velocidade da nave do tipo rapida
+var movimentoTiro = 2.1;		//Variavel para a velocidade do tiro
 
 /*********** INFORMACOES SOBRE A COLISAO ***********/
 var distanciaColisao = 28; 	//Variavel que indica a distancia necessaria entre uma nave e outra para colidir
@@ -91,7 +88,7 @@ jogador.y = canvas.height/2;			//Posicao Y inicial do jogador
 jogador.angulo = 0;						//Angulo inicial do jogador
 jogador.tipo = 'jogador';				//Tipo da nave do jogador
 jogador.velocidade = movimentoNormal;	//Velocidade da nave do jogador
-jogador.balas = new Array();			//Lista de tiros do jogador
+jogador.qtdBalas = 0;						//Lista de tiros do jogador
  
 var inimigos = new Array();				//Lista de inimigos na tela
 var balas = new Array();				//Lista de tiros na tela
@@ -165,20 +162,20 @@ function NaveJogo() {
 		this.angulo = 0;
 		this.tipo = 'devagar';
 		this.velocidade = movimentoNormal;
-		this.balas = new Array();
+		this.qtdBalas = 0;
 }
 
 /**
 Estrutura da bala com as posições x,y,angulo, altura e largura, velocidade e se a origem da bala foi de um jogador ou de um inimigo
 */
-function Bala(x, y, angulo, origemJogador){
+function Bala(x, y, angulo, origem){
 	this.x = x;
 	this.y = y;
 	this.angulo = angulo;
 	this.width = 3;
 	this.height = 12;
 	this.velocidade = movimentoTiro;
-	this.origemJogador = origemJogador;
+	this.origem = origem;
 }
 
 
@@ -232,7 +229,7 @@ function redesenharNave(nave){
 function desenhaBalas(){
 
 	verificaLimiteTelaBala();
-	verificaColisaoBala();
+	verificaColisaoBalaNoJogador();
 	verificaColisaoBalaNoInimigo();
 	for (i = 0; i < balas.length; i += 1) {
 		if (balas[i].angulo == 0){
@@ -341,309 +338,278 @@ window.addEventListener("keydown", function(e) {
 	}
 });
 
-function efetuarDisparo(nave){
-	var numMaxBalas = 1;
-	var origemJogador = 0;
+function efetuarDisparo(nave){	
+	var numMaxBalas = 1;	
 	if (nave.tipo == "jogador"){
-		numMaxBalas = 3;
-		origemJogador = 1;
+		numMaxBalas = 2;
 	}
-	if(nave.balas.length <= numMaxBalas){
+	
+	if(nave.qtdBalas <= numMaxBalas){
 		if (nave.angulo == 0){
-			var novaBala = new Bala(nave.x - 2, nave.y - 20, nave.angulo, origemJogador); 
-			balas[balas.length] = novaBala;
-			nave.balas.push(novaBala);
+			var novaBala = new Bala(nave.x - 2, nave.y - 20, nave.angulo, nave); 
+			balas.push(novaBala);
+			nave.qtdBalas += 1;
 		}
 		if (nave.angulo == 90){
-			var novaBala = new Bala(nave.x + 20, nave.y - 2, nave.angulo, origemJogador); 
-			balas[balas.length] = novaBala;
-			nave.balas.push(novaBala);
+			var novaBala = new Bala(nave.x + 20, nave.y - 2, nave.angulo, nave); 
+			balas.push(novaBala);
+			nave.qtdBalas += 1;
 		}
 		if (nave.angulo == 180){
-			var novaBala = new Bala(nave.x + 2, nave.y + 20, nave.angulo, origemJogador);
-			balas[balas.length] = novaBala;
-			nave.balas.push(novaBala);
+			var novaBala = new Bala(nave.x + 2, nave.y + 20, nave.angulo, nave);
+			balas.push(novaBala);
+			nave.qtdBalas += 1;
 		}
 		if (nave.angulo == 270){
-			var novaBala = new Bala(nave.x - 20, nave.y + 2, nave.angulo, origemJogador);
-			balas[balas.length] = novaBala;
-			nave.balas.push(novaBala);
+			var novaBala = new Bala(nave.x - 20, nave.y + 2, nave.angulo, nave);
+			balas.push(novaBala);
+			nave.qtdBalas += 1;
 		}
+		console.log("Balas da nave "+nave.tipo+" = "+ nave.qtdBalas);
 	}
+	
 }
 
-function verificaColisaoBala(){
+function verificaColisaoBalaNoJogador(){
 	//FUNCAO QUE VERIFICA COLISAO DA BALA NO JOGADOR
 	var rangeX = 10;
 	var rangeY = 10;
+	var colidiu = 0;
+	var newBalas = new Array();
 	for(i = 0 ; i < balas.length; i++){
-		if(balas[i].origemJogador == 0){
-			//console.log('x bala ' + balas[i].x + ' y bala ' + balas[i].y);
-			//console.log('x jogo ' + jogador.x + ' y jogo ' + jogador.y);
-			if(balas[i].x > jogador.x - rangeX && balas[i].x < jogador + rangeX){
-				console.log('na mesma posicao x');
-				if(balas[i].y > jogador.y - rangeY && balas[i].y < jogador.y + rangeY){
-					console.log('atingiu jogador');			
-				}
+		if(balas[i].origem.tipo != "jogador"){			
+			if(balas[i].x > jogador.x - rangeX && balas[i].x < jogador.x + rangeX){				
+				if(balas[i].y > jogador.y - rangeY && balas[i].y < jogador.y + rangeY){					
+					colidiu = 1;
+					console.log("balas[i].origem.balas: " + balas[i].origem.qtdBalas);
+					console.log("balas[i].origem.tipo: " + balas[i].origem.tipo);
+					balas[i].origem.qtdBalas-=1;
+					console.log("balas[i].origem.balas: " + balas[i].origem.qtdBalas);
+					console.log("balas[i].origem.tipo: " + balas[i].origem.tipo);
+				}				
+			}			
+		}
+		if (colidiu == 1) {
+			reiniciarJogo();
+			qtdVidas = qtdVidas - 1;
+			console.log("bala: " + balas[i]);			
+			if (qtdVidas <= 0) {
+				gameOver();
+			} else {
+				atualizarStatus();
 			}
+		} else {
+			newBalas.push(balas[i]);
 		}
 	}
+	balas = newBalas;
+	
 }
 
-function verificaColisaoBalaNoInimigo(){
-	var rangeX = 10;
-	var rangeY = 10;
-	var atingido = 0; 
-	for(i = 0 ; i < balas.length; i++){
-		for(j = 0; j < inimigos.length; j++){
-			if(balas[i].origemJogador == 1){
-				if(balas[i].x > inimigos[j].x - rangeX && balas[i].x < inimigos[j].x + rangeX){
-					if(balas[i].y > inimigos[j].y - rangeY && balas[i].y < inimigos[j].y + rangeY){
 
-						if(inimigos[j].tipo == 'devagar'){
-							pontos += 10;
-						}else if(inimigos[j].tipo == 'devagarAtira'){
-							pontos += 20;
-						}else if(inimigos[j].tipo == 'rapidoAtira'){
-							pontos += 30;
+function verificaColisaoBalaNoInimigo() {
+		var rangeX = 10;
+		var rangeY = 10;
+		var atingido = 0;
+		for (i = 0; i < balas.length; i++) {
+			for (j = 0; j < inimigos.length; j++) {
+				if (balas[i].origem.tipo == "jogador") {
+					if (balas[i].x > inimigos[j].x - rangeX
+							&& balas[i].x < inimigos[j].x + rangeX) {
+						if (balas[i].y > inimigos[j].y - rangeY
+								&& balas[i].y < inimigos[j].y + rangeY) {
+
+							if (inimigos[j].tipo == 'devagar') {
+								pontos += 10;
+							} else if (inimigos[j].tipo == 'devagarAtira') {
+								pontos += 20;
+							} else if (inimigos[j].tipo == 'rapidoAtira') {
+								pontos += 30;
+							}
+
+							if (pontos >= vidaExtra) {
+								qtdVidas += 1;
+								vidaExtra += 500;
+								atualizarVidas();
+							}
+
+							atualizarPontos();
+							verificaFase();
+
+							inimigos.splice(j, 1);
+							atingido = 1;
+							gerarInimigo();
 						}
-						
-						if(pontos >= vidaExtra){
-							qtdVidas += 1;
-							vidaExtra += 500;
-							atualizarVidas();
-						}						
-						
-						atualizarPontos();
-						verificaFase();
-						
-						inimigos.splice(j, 1);
-						atingido = 1;							
-						gerarInimigo();						
 					}
 				}
 			}
+			if (atingido == 1) {
+				balas.splice(i, 1);
+				jogador.qtdBalas -= 1;
+			}
+			atingido = 0;
 		}
-		if(atingido == 1){
-			balas.splice(i, 1);
-			jogador.balas.shift();			
-		}
-		atingido = 0;
 	}
-}
 
+	function modificaAngulo(valor, nave) {
+		if (valor == 38) { //seta cima
+			if (!colidiuX(nave)) {
+				if (nave.y - nave.velocidade >= 15) {
+					pressionado = -1;
+					nave.angulo = 0;
+					redesenharNave(nave);
+				}
+			}
+		}
+		if (valor == 40) { //seta baixo				
+			if (!colidiuX(nave)) {
+				//Detecta se ira passar da area do canvas
+				if (nave.y + nave.velocidade <= canvas.height - 15) {
+					pressionado = -1;
+					nave.angulo = 180;
+					redesenharNave(nave);
+				}
+			}
+		}
 
-function modificaAngulo(valor, nave){
-	if (valor == 38){ //seta cima
-		if (!colidiuX(nave)){
-			if(nave.y-nave.velocidade >= 15) {
-				pressionado = -1;
-				nave.angulo = 0;
-				redesenharNave(nave);
-			} 
-		}			
-	}
-	if (valor == 40){ //seta baixo				
-		if (!colidiuX(nave)){
-			//Detecta se ira passar da area do canvas
-			if(nave.y+nave.velocidade <= canvas.height-15) {
-				pressionado = -1;
-				nave.angulo = 180;
-				redesenharNave(nave);
+		if (valor == 37) { //seta esquerda
+			if (!colidiuY(nave)) {
+				//Detecta se ira passar da area do canvas
+				if (nave.x - nave.velocidade >= 15) {
+					pressionado = -1;
+					nave.angulo = 270;
+					redesenharNave(nave);
+				}
 			}
+
+		}
+		if (valor == 39) { //seta direita
+			if (!colidiuY(nave)) {
+				if (nave.x + nave.velocidade <= canvas.width - 15) {
+					pressionado = -1;
+					nave.angulo = 90;
+					redesenharNave(nave);
+				}
+			}
+
 		}
 	}
-	
-	if(valor == 37) { //seta esquerda
-		if (!colidiuY(nave)){
-			//Detecta se ira passar da area do canvas
-			if(nave.x-nave.velocidade >= 15) {
-				pressionado = -1;
-				nave.angulo = 270;
-				redesenharNave(nave);
-			}
-		}
-		
-	}
-	if(valor == 39) { //seta direita
-		if (!colidiuY(nave)){
-			if(nave.x + nave.velocidade <= canvas.width-15) {
-				pressionado = -1;
-				nave.angulo = 90;
-				redesenharNave(nave);
-			}
-		}
-		
-	}
-}
 
 	function movimentoNave(nave) {
-		if(nave.angulo == 0){
-			nave.y-= nave.velocidade;
-		}
-		else if(nave.angulo == 90){
+		if (nave.angulo == 0) {
+			nave.y -= nave.velocidade;
+		} else if (nave.angulo == 90) {
 			nave.x += nave.velocidade;
-		}
-		else if(nave.angulo == 180){
-			nave.y+= nave.velocidade;
-		}
-		else if(nave.angulo == 270){
-			nave.x-= nave.velocidade;
+		} else if (nave.angulo == 180) {
+			nave.y += nave.velocidade;
+		} else if (nave.angulo == 270) {
+			nave.x -= nave.velocidade;
 		}
 	}
 
-	
-	function verificaLimiteTela(nave){
-		if(nave.y >= canvas.height){
-			nave.y = 2; 
-		}else if(nave.y <= 0){
-			nave.y = canvas.height; 
-		}else if(nave.x >= canvas.width){
+	function verificaLimiteTela(nave) {
+		if (nave.y >= canvas.height) {
+			nave.y = 2;
+		} else if (nave.y <= 0) {
+			nave.y = canvas.height;
+		} else if (nave.x >= canvas.width) {
 			nave.x = 0;
-		}else if(nave.x <= 0){
+		} else if (nave.x <= 0) {
 			nave.x = canvas.width;
 		}
 	}
 
-	function verificaFase(){
-		if(pontos >= metaPontuacao){
+	function verificaFase() {
+		if (pontos >= metaPontuacao) {
 			metaPontuacao += parseInt(metaPontuacao * 1.2);
 			fase = fase + 1;
 			qtdMaxInimigos = fase * 3;
 			atualizarFase();
 		}
-	}	
+	}
 
-	function verificaLimiteTelaBala(){
-			for(i = 0; i < balas.length; i++){
-					if(balas[i].y >= canvas.height){
-						if(balas[i].origemJogador == 1){
-							jogador.balas.shift();							
-						}else{
-							for(j = 0; j < inimigos.length; j++){
-								var balasInimigo = inimigos[j].balas;
-								for(w = 0; w < balasInimigo.length; w++){
-									if(balasInimigo[w].x == balas[i].x && balasInimigo[w].y == balas[i].y){
-										inimigos[j].balas.splice(w,1);
-									}
-								}
-							}
-						}
-						balas.shift();
-					}else if(balas[i].y <= 0){
-						if(balas[i].origemJogador == 1){
-							jogador.balas.shift();							
-						}else{
-							for(j = 0; j < inimigos.length; j++){
-								var balasInimigo = inimigos[j].balas;
-								for(w = 0; w < balasInimigo.length; w++){
-									if(balasInimigo[w].y == balas[i].y){
-										inimigos[j].balas.splice(w,1);
-									}
-								}
-							}
-						}
-						balas.shift();
-					}else if(balas[i].x >= canvas.width){
-						if(balas[i].origemJogador == 1){
-							jogador.balas.shift();							
-						}else{
-							for(j = 0; j < inimigos.length; j++){
-								var balasInimigo = inimigos[j].balas;
-								for(w = 0; w < balasInimigo.length; w++){
-									if(balasInimigo[w].y == balas[i].y){
-										inimigos[j].balas.splice(w,1);
-									}
-								}
-							}
-						}
-						balas.shift();
-					}else if(balas[i].x <= 0){
-						if(balas[i].origemJogador == 1){
-							jogador.balas.shift();							
-						}else{
-							for(j = 0; j < inimigos.length; j++){
-								var balasInimigo = inimigos[j].balas;
-								for(w = 0; w < balasInimigo.length; w++){
-									if(balasInimigo[w].y == balas[i].y){
-										inimigos[j].balas.splice(w,1);
-									}
-								}
-							}
-						}
-						balas.shift();
-					}
-			}
+	function verificaLimiteTelaBala() {
+		var i = 0;
+		var newBalas = new Array;
+		while (i < balas.length) {
+			if (balas[i].y >= canvas.height || balas[i].y <= 0 || balas[i].x >= canvas.width || balas[i].x <= 0) {
+				balas[i].origem.qtdBalas-=1;
+				//balas.splice[i,1];				
+			} else {
+				newBalas.push(balas[i]);				
+			} 
 			
-	}	
-	
-	function dispararTiro(nave){
-		if(nave.tipo == 'devagarAtira' || nave.tipo == 'rapidoAtira'){
-		var rangeX = 10;
-		var rangeY = 10;
-				
-			switch(nave.angulo){
-				case 0:{
-					if(jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX){
-						efetuarDisparo(nave);
-					}
-					break;
-				}
-				
-				case 90:{
-					if(jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY){
-						efetuarDisparo(nave);
-					}
-					break;
-				}
-				case 180:{
-					if(jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX){
-						efetuarDisparo(nave);
-					}
-					break;
-				}
-				case 270:{
-					if(jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY){
-						efetuarDisparo(nave);
-					}
-					break;
-				}	
-			}	
+			i++;
+			
 		}
-	
+		balas = newBalas;
 	}
 	
-	function loop() {	
-		
-	  verificaLimiteTela(jogador);
-	  desenha();
-	  desenhaBalas();
-	  for(i = 0; i < inimigos.length; i++){
-	  	verificaLimiteTela(inimigos[i]);
-	  	movimentoNave(inimigos[i]);
-	  	colidiuInimigo();
-	  	if(!inimigoColidido){
-	  		redesenharNave(inimigos[i]);
-	  		dispararTiro(inimigos[i]);
-	  	}
-	  	
-	  }
-	  movimentoNave(jogador);
-	  colidiuInimigo();
-	  if (pressionado != -1){
-			modificaAngulo(pressionado,jogador);
-	  }
-	  redesenharNave(jogador);
-	  
-	  window.requestAnimFrame(loop, canvas);
-	} 
-	
-			
+
+	function dispararTiro(nave) {
+		if (nave.tipo == 'devagarAtira' || nave.tipo == 'rapidoAtira') {
+			var rangeX = 10;
+			var rangeY = 10;
+
+			switch (nave.angulo) {
+			case 0: {
+				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX) {
+					efetuarDisparo(nave);
+				}
+				break;
+			}
+
+			case 90: {
+				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY) {
+					efetuarDisparo(nave);
+				}
+				break;
+			}
+			case 180: {
+				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX) {
+					efetuarDisparo(nave);
+				}
+				break;
+			}
+			case 270: {
+				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY) {
+					efetuarDisparo(nave);
+				}
+				break;
+			}
+			}
+		}
+
+	}
+
+	function loop() {
+
+		verificaLimiteTela(jogador);
+		desenha();
+		desenhaBalas();
+		for (i = 0; i < inimigos.length; i++) {
+			verificaLimiteTela(inimigos[i]);
+			movimentoNave(inimigos[i]);
+			colidiuInimigo();
+			if (!inimigoColidido) {
+				redesenharNave(inimigos[i]);
+				dispararTiro(inimigos[i]);
+			}
+
+		}
+		movimentoNave(jogador);
+		colidiuInimigo();
+		if (pressionado != -1) {
+			modificaAngulo(pressionado, jogador);
+		}
+		redesenharNave(jogador);
+
+		window.requestAnimFrame(loop, canvas);
+	}
+
 	window.requestAnimFrame(loop, canvas);
 	gerarInimigo();
 	var intervaloGeracaoInimigo = window.setInterval(gerarInimigo, 5000);
-
-	
 </script>
-  </body>
+</body>
 </html>
