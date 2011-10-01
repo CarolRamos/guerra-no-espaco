@@ -15,13 +15,17 @@
 			<td id="campoMeta">Meta: 100</td>
 			<td id="campoFase">Fase: 1</td>
 			<td id="campoVidas">Vidas: 3</td>
-			<td></td>
 		</tr>
 		<tr>
 			<td colspan=3><canvas id="surface" width="640" height="480"
 					style="background-color: #ccc;"></canvas></td>
-			<td><b>Comandos:</b></br> <b>P </b>- Iniciar o jogo</br> <b>Barra de
-					espa&ccedil;o </b>- Atirar</td>
+			<td>
+				<b>Comandos:</b>
+				</br><b>Barra de espa&ccedil;o </b>- Atirar
+				</br><b>P </b>- Pausar
+				</br><b>I </b>- Iniciar Jogo
+				</br><b>R </b>- Reiniciar Jogo
+			</td>
 		</tr>
 
 
@@ -210,6 +214,9 @@ function desenha() {
 		ctx.restore();
 }
 
+/**
+Função que recebe uma nave com parametro e desenha esta nave na tela escolhendo a imagem a depender do tipo da nave. 
+ */
 function redesenharNave(nave){
 	ctx.save();
 	ctx.translate(nave.x, nave.y);
@@ -225,6 +232,7 @@ function redesenharNave(nave){
 	}
 	ctx.restore();
 }
+
 
 function desenhaBalas(){
 
@@ -303,8 +311,7 @@ function atualizarStatus(){
 	atualizarPontos();
 }
 
-function gameOver(){
-	alert("Game-Over");
+function iniciarJogo(){
 	qtdVidas = 3;
 	fase = 1;
 	pontos = 0;
@@ -316,25 +323,53 @@ function gameOver(){
 	clearInterval(intervaloGeracaoInimigo);
 }
 
+function gameOver(){
+	alert("Game-Over");
+	iniciarJogo();
+	jogoIniciado = false;
+}
+
 function reiniciarJogador(){
 	jogador.x = canvas.width/2-23;
 	jogador.y = canvas.height/2;
-	jogador.angulo = 0; 
+	jogador.angulo = 0;
 }
 
 function reiniciarJogo(){
 	reiniciarJogador();
 	var intervaloGeracaoInimigo = window.setInterval(gerarInimigo, 6000);
 }
-	
+var jogoPausado = false;
+var jogoIniciado = false;
 window.addEventListener("keydown", function(e) {
 	//Barra de espaço = 32
 	// P = 80
-	if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){	
-		pressionado = e.keyCode; 		
+	if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){
+		if((jogoPausado == false) && (jogoIniciado == true)){
+			pressionado = e.keyCode; 
+		}
 	}
 	if (e.keyCode == 32){
-		efetuarDisparo(jogador);
+		if((jogoPausado == false) && (jogoIniciado == true)){
+			efetuarDisparo(jogador);
+		}
+	}
+	if (e.keyCode == 80){
+			jogoPausado = !jogoPausado;
+	}
+	
+	if (e.keyCode == 82){
+		if(jogoPausado == false){
+			jogoIniciado = true;
+			jogoPausado = false;
+			iniciarJogo();
+			reiniciarJogo();
+			inimigos = new Array();
+		}
+	}
+	
+	if (e.keyCode == 73){
+		jogoIniciado = true;
 	}
 });
 
@@ -391,16 +426,19 @@ function verificaColisaoBalaNoJogador(){
 		}
 		if (colidiu == 1) {
 			reiniciarJogo();
-			qtdVidas = qtdVidas - 1;
 			console.log("bala: " + balas[i]);			
-			if (qtdVidas <= 0) {
-				gameOver();
-			} else {
-				atualizarStatus();
-			}
 		} else {
 			newBalas.push(balas[i]);
 		}
+	}
+	if (colidiu == 1) {
+			qtdVidas = qtdVidas - 1;
+			if (qtdVidas <= 0) {
+				gameOver();
+				
+			} else {
+				atualizarStatus();
+			}
 	}
 	balas = newBalas;
 	
@@ -583,27 +621,28 @@ function verificaColisaoBalaNoInimigo() {
 	}
 
 	function loop() {
-
-		verificaLimiteTela(jogador);
-		desenha();
-		desenhaBalas();
-		for (i = 0; i < inimigos.length; i++) {
-			verificaLimiteTela(inimigos[i]);
-			movimentoNave(inimigos[i]);
-			colidiuInimigo();
-			if (!inimigoColidido) {
-				redesenharNave(inimigos[i]);
-				dispararTiro(inimigos[i]);
+		if((jogoPausado == false) && (jogoIniciado == true)){
+			verificaLimiteTela(jogador);
+			desenha();
+			desenhaBalas();
+			for (i = 0; i < inimigos.length; i++) {
+				verificaLimiteTela(inimigos[i]);
+				movimentoNave(inimigos[i]);
+				colidiuInimigo();
+				if (!inimigoColidido) {
+					redesenharNave(inimigos[i]);
+					dispararTiro(inimigos[i]);
+				}
+	
 			}
+			movimentoNave(jogador);
+			colidiuInimigo();
+			if (pressionado != -1) {
+				modificaAngulo(pressionado, jogador);
+			}
+			redesenharNave(jogador);
 
 		}
-		movimentoNave(jogador);
-		colidiuInimigo();
-		if (pressionado != -1) {
-			modificaAngulo(pressionado, jogador);
-		}
-		redesenharNave(jogador);
-
 		window.requestAnimFrame(loop, canvas);
 	}
 
