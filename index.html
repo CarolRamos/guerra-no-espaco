@@ -600,26 +600,26 @@ function verificaColisaoBalaNoInimigo() {
 
 			switch (nave.angulo) {
 			case 0: {
-				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX) {
+				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX && jagador.y < nave.y) {					
 					efetuarDisparo(nave);
 				}
 				break;
 			}
 
 			case 90: {
-				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY) {
+				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY && jogador.x > nave.x) {
 					efetuarDisparo(nave);
 				}
 				break;
 			}
 			case 180: {
-				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX) {
+				if (jogador.x > nave.x - rangeX && jogador.x < nave.x + rangeX && jogador.y > nave.y) {
 					efetuarDisparo(nave);
 				}
 				break;
 			}
 			case 270: {
-				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY) {
+				if (jogador.y > nave.y - rangeY && jogador.y < nave.y + rangeY && jogador.x < nave.x) {
 					efetuarDisparo(nave);
 				}
 				break;
