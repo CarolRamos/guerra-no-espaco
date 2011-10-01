@@ -233,7 +233,9 @@ function redesenharNave(nave){
 	ctx.restore();
 }
 
-
+/**
+ Função que percorre a lista de balas e as desenha na tela
+ */
 function desenhaBalas(){
 
 	verificaLimiteTelaBala();
@@ -255,6 +257,13 @@ function desenhaBalas(){
 		ctx.save();
 		ctx.translate(balas[i].x, balas[i].y);
 		ctx.rotate(balas[i].angulo * Math.PI/180);
+		if(balas[i].origem.tipo == 'jogador'){
+			ctx.fillStyle = "rgba(255, 0, 0, 255)";
+		}else if(balas[i].origem.tipo == 'devagarAtira'){
+			ctx.fillStyle = "rgba(0, 255, 0, 255)";
+		}else if(balas[i].origem.tipo == 'rapidoAtira'){
+			ctx.fillStyle = "rgba(255, 255, 0, 255)";
+		}
 		ctx.fillRect(0, 0, balas[i].width, balas[i].height);
 		ctx.restore();
 	}
